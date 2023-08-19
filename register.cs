@@ -38,7 +38,7 @@ namespace AzureDevOps
         public string assetid { get; set; }
     }
     public record class jsonContent(
-        List<string> deviceIds = null);
+        Dictionary<string, Device>.KeyCollection deviceIds = null);
 
     public static class register
     {
@@ -53,27 +53,41 @@ namespace AzureDevOps
             dynamic data = JsonConvert.DeserializeObject(requestBody);
             JArray devices = data?.devices;
             List<string> deviceIds = new List<string>{};
-            
+            Dictionary<string, Device> devicesHashMap = new Dictionary<string, Device>();
             foreach (JObject item in devices) // <-- Note that here we used JObject instead of usual JProperty
             {
                 string id = item.GetValue("id").ToString();
+                string name = item.GetValue("Name").ToString();
+                string type = item.GetValue("type").ToString();
+                string location = item.GetValue("location").ToString();
                 deviceIds.Add(id);
+                devicesHashMap.Add(id, new Device{
+                    id = id,
+                    name = name,
+                    type = type,
+                    location = location
+                });
+
             }
 
             if (deviceIds.Count == 1)
             {
                 using HttpClient client = GetHttpClient("yeK7CM/Pj2vA3MFpuBxIFX7QIl1cKFOiviZaOjtVCrTq0VUzKeQjfw==");
-                DeviceJSON ret = await ProcessDeviceAsync(client, deviceIds[0]);
+                DeviceJSON ret = await ProcessDeviceAsync(client, devicesHashMap);
                 // return new OkObjectResult(ret);
             }
 
             if (deviceIds.Count > 1)
             {
                 using HttpClient client = GetHttpClient("DRefJc8eEDyJzS19qYAKopSyWW8ijoJe8zcFhH5J1lhFtChC56ZOKQ==");
-                DevicesJSON ret = await ProcessDevicesAsync(client, deviceIds);
+                DevicesJSON ret = await ProcessDevicesAsync(client, devicesHashMap);
                 // return new OkObjectResult(ret);
     
             }
+            var e = devicesHashMap.GetEnumerator();
+            e.MoveNext();
+            string anElement = e.Current.Key;
+            log.LogInformation(anElement);
 
             Device dummy = new Device();
             dummy.id = "DVID000003";
@@ -92,20 +106,24 @@ namespace AzureDevOps
 
             return new OkObjectResult(rett);
         }
-        static async Task<DeviceJSON> ProcessDeviceAsync(HttpClient client, string deviceID)
+        static async Task<DeviceJSON> ProcessDeviceAsync(HttpClient client, Dictionary<string, Device> devicesHashMap)
         {
-            string getRequestUrl = "http://tech-assessment.vnext.com.au/api/devices/assetId/DVID00000125" + deviceID;
+            var enumerator = devicesHashMap.GetEnumerator();
+            enumerator.MoveNext();
+            string anElement = enumerator.Current.Key;
+            string getRequestUrl = "http://tech-assessment.vnext.com.au/api/devices/assetId/" + anElement;
+            
             await using Stream stream =
                 await client.GetStreamAsync(getRequestUrl);
             DeviceJSON device = await System.Text.Json.JsonSerializer.DeserializeAsync<DeviceJSON>(stream);
             return device;
         }
-        static async Task<DevicesJSON> ProcessDevicesAsync(HttpClient client, List<string> deviceIds)
+        static async Task<DevicesJSON> ProcessDevicesAsync(HttpClient client, Dictionary<string, Device> deviceIds)
         {
             string postRequestUrl = "http://tech-assessment.vnext.com.au/api/devices/assetId/";
             using HttpResponseMessage response = await client.PostAsJsonAsync(
                 postRequestUrl, 
-                new jsonContent(deviceIds:deviceIds));
+                new jsonContent(deviceIds:deviceIds.Keys));
             var deserializedObject = JsonConvert.DeserializeObject<DevicesJSON>(response.Content.ReadAsStringAsync().Result);
             return deserializedObject;
         }
