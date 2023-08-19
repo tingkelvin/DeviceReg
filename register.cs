@@ -20,13 +20,13 @@ using Newtonsoft.Json.Linq;
 
 namespace AzureDevOps
 {
-    public record class DeviceJSON(
+    public record class Asset(
         [property: JsonPropertyName("deviceId")] string deviceId,
         [property: JsonPropertyName("assetId")] string assetId
     );
 
-    public record class DevicesJSON(
-        [property: JsonPropertyName("devices")] List<DeviceJSON> devices
+    public record class Assets(
+        [property: JsonPropertyName("devices")] List<Asset> devices
     );
 
     public class Device
@@ -72,64 +72,57 @@ namespace AzureDevOps
 
             }
 
-            if (deviceIds.Count == 1)
-            {
-                using HttpClient client = GetHttpClient(Environment.GetEnvironmentVariable("GET_API_KEY"));
-                DeviceJSON ret = await ProcessDeviceAsync(client, devicesHashMap);
-                // return new OkObjectResult(ret);
-            }
-
-            if (deviceIds.Count > 1)
-            {
-                using HttpClient client = GetHttpClient("DRefJc8eEDyJzS19qYAKopSyWW8ijoJe8zcFhH5J1lhFtChC56ZOKQ==");
-                DevicesJSON ret = await ProcessDevicesAsync(client, devicesHashMap);
-                // return new OkObjectResult(ret);
     
-            }
-            var e = devicesHashMap.GetEnumerator();
-            e.MoveNext();
-            string anElement = e.Current.Key;
-            log.LogInformation(anElement);
+    
+            List<Asset> ret = await ProcessDeviceAsync(devicesHashMap);
+            return new OkObjectResult(ret);
 
-            Device dummy = new Device();
-            dummy.id = "DVID000003";
-            dummy.name = "dummy3";
-            dummy.location = "home";
-            dummy.type = "1";
-            dummy.assetid = "1123";
+            // var e = devicesHashMap.GetEnumerator();
+            // e.MoveNext();
+            // string anElement = e.Current.Key;
+            // log.LogInformation(anElement);
+
+            // Device dummy = new Device();
+            // dummy.id = "DVID000003";
+            // dummy.name = "dummy3";
+            // dummy.location = "home";
+            // dummy.type = "1";
+            // dummy.assetid = "1123";
             // if (deviceTable.completed == null)
             //     {
             //         deviceTable.completed = false;
             //     }
 
-            await deviceTable.AddAsync(dummy);
-            await deviceTable.FlushAsync();
-            List<Device> rett = new List<Device> { dummy };
+            // await deviceTable.AddAsync(dummy);
+            // await deviceTable.FlushAsync();
+            // List<Device> rett = new List<Device> { dummy };
 
-            return new OkObjectResult(rett);
+            // return new OkObjectResult(rett);
         }
-        static async Task<DeviceJSON> ProcessDeviceAsync(HttpClient client, Dictionary<string, Device> devicesHashMap)
+        static async Task<List<Asset>> ProcessDeviceAsync(Dictionary<string, Device> devicesHashMap)
         {
-            var enumerator = devicesHashMap.GetEnumerator();
-            enumerator.MoveNext();
-            string anElement = enumerator.Current.Key;
-            string getRequestUrl = Environment.GetEnvironmentVariable("API_HOST") + anElement;
-            
-            await using Stream stream =
-                await client.GetStreamAsync(getRequestUrl);
-            DeviceJSON device = await System.Text.Json.JsonSerializer.DeserializeAsync<DeviceJSON>(stream);
-            return device;
-        }
-        static async Task<DevicesJSON> ProcessDevicesAsync(HttpClient client, Dictionary<string, Device> deviceIds)
-        {
+            if (devicesHashMap.Count == 1)
+            {
+                using HttpClient getClient = GetHttpClient(Environment.GetEnvironmentVariable("GET_API_KEY"));
+                var enumerator = devicesHashMap.GetEnumerator();
+                enumerator.MoveNext();
+                string anElement = enumerator.Current.Key;
+                string getRequestUrl = Environment.GetEnvironmentVariable("API_HOST") + anElement;
+                await using Stream stream =
+                    await getClient.GetStreamAsync(getRequestUrl);
+                Asset asset = await System.Text.Json.JsonSerializer.DeserializeAsync<Asset>(stream);
+                return new List<Asset>{asset};
+            }
+
+            using HttpClient postClient = GetHttpClient(Environment.GetEnvironmentVariable("POST_API_KEY"));
             string postRequestUrl = Environment.GetEnvironmentVariable("API_HOST");
-            using HttpResponseMessage response = await client.PostAsJsonAsync(
+            using HttpResponseMessage response = await postClient.PostAsJsonAsync(
                 postRequestUrl, 
-                new jsonContent(deviceIds:deviceIds.Keys));
-            var deserializedObject = JsonConvert.DeserializeObject<DevicesJSON>(response.Content.ReadAsStringAsync().Result);
-            return deserializedObject;
-        }
+                new jsonContent(deviceIds:devicesHashMap.Keys));
+            var deserializedObject = JsonConvert.DeserializeObject<Assets>(response.Content.ReadAsStringAsync().Result);
+            return deserializedObject.devices;
 
+        }
         public static HttpClient GetHttpClient(string password){
             HttpClient client = new();
             client.DefaultRequestHeaders.Accept.Clear();
