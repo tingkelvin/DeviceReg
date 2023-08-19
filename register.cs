@@ -54,6 +54,8 @@ namespace AzureDevOps
             JArray devices = data?.devices;
             List<string> deviceIds = new List<string>{};
             Dictionary<string, Device> devicesHashMap = new Dictionary<string, Device>();
+
+    
             foreach (JObject item in devices) // <-- Note that here we used JObject instead of usual JProperty
             {
                 string id = item.GetValue("id").ToString();
@@ -72,7 +74,7 @@ namespace AzureDevOps
 
             if (deviceIds.Count == 1)
             {
-                using HttpClient client = GetHttpClient("yeK7CM/Pj2vA3MFpuBxIFX7QIl1cKFOiviZaOjtVCrTq0VUzKeQjfw==");
+                using HttpClient client = GetHttpClient(Environment.GetEnvironmentVariable("GET_API_KEY"));
                 DeviceJSON ret = await ProcessDeviceAsync(client, devicesHashMap);
                 // return new OkObjectResult(ret);
             }
@@ -111,7 +113,7 @@ namespace AzureDevOps
             var enumerator = devicesHashMap.GetEnumerator();
             enumerator.MoveNext();
             string anElement = enumerator.Current.Key;
-            string getRequestUrl = "http://tech-assessment.vnext.com.au/api/devices/assetId/" + anElement;
+            string getRequestUrl = Environment.GetEnvironmentVariable("API_HOST") + anElement;
             
             await using Stream stream =
                 await client.GetStreamAsync(getRequestUrl);
@@ -120,7 +122,7 @@ namespace AzureDevOps
         }
         static async Task<DevicesJSON> ProcessDevicesAsync(HttpClient client, Dictionary<string, Device> deviceIds)
         {
-            string postRequestUrl = "http://tech-assessment.vnext.com.au/api/devices/assetId/";
+            string postRequestUrl = Environment.GetEnvironmentVariable("API_HOST");
             using HttpResponseMessage response = await client.PostAsJsonAsync(
                 postRequestUrl, 
                 new jsonContent(deviceIds:deviceIds.Keys));
