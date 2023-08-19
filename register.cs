@@ -20,16 +20,16 @@ using Newtonsoft.Json.Linq;
 
 namespace AzureDevOps
 {
-    public record class Device(
+    public record class DeviceJSON(
         [property: JsonPropertyName("deviceId")] string deviceId,
         [property: JsonPropertyName("assetId")] string assetId
     );
 
-    public record class Devices(
-        [property: JsonPropertyName("devices")] List<Device> devices
+    public record class DevicesJSON(
+        [property: JsonPropertyName("devices")] List<DeviceJSON> devices
     );
 
-    public class DeviceSQL
+    public class Device
     {
         public string id { get; set; }
         public string name { get; set; }
@@ -46,7 +46,7 @@ namespace AzureDevOps
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,
             ILogger log,
-            [Sql(commandText: "dbo.Device", connectionStringSetting: "SqlConnectionString")] IAsyncCollector<DeviceSQL> deviceTable)
+            [Sql(commandText: "dbo.Device", connectionStringSetting: "SqlConnectionString")] IAsyncCollector<Device> deviceTable)
         {
             log.LogInformation("C# HTTP trigger processed a request.");
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
@@ -63,19 +63,19 @@ namespace AzureDevOps
             if (deviceIds.Count == 1)
             {
                 using HttpClient client = GetHttpClient("yeK7CM/Pj2vA3MFpuBxIFX7QIl1cKFOiviZaOjtVCrTq0VUzKeQjfw==");
-                Device ret = await ProcessDeviceAsync(client, deviceIds[0]);
+                DeviceJSON ret = await ProcessDeviceAsync(client, deviceIds[0]);
                 // return new OkObjectResult(ret);
             }
 
             if (deviceIds.Count > 1)
             {
                 using HttpClient client = GetHttpClient("DRefJc8eEDyJzS19qYAKopSyWW8ijoJe8zcFhH5J1lhFtChC56ZOKQ==");
-                Devices ret = await ProcessDevicesAsync(client, deviceIds);
+                DevicesJSON ret = await ProcessDevicesAsync(client, deviceIds);
                 // return new OkObjectResult(ret);
     
             }
 
-            DeviceSQL dummy = new DeviceSQL();
+            Device dummy = new Device();
             dummy.id = "DVID000003";
             dummy.name = "dummy3";
             dummy.location = "home";
@@ -88,25 +88,25 @@ namespace AzureDevOps
 
             await deviceTable.AddAsync(dummy);
             await deviceTable.FlushAsync();
-            List<DeviceSQL> rett = new List<DeviceSQL> { dummy };
+            List<Device> rett = new List<Device> { dummy };
 
             return new OkObjectResult(rett);
         }
-        static async Task<Device> ProcessDeviceAsync(HttpClient client, string deviceID)
+        static async Task<DeviceJSON> ProcessDeviceAsync(HttpClient client, string deviceID)
         {
             string getRequestUrl = "http://tech-assessment.vnext.com.au/api/devices/assetId/DVID00000125" + deviceID;
             await using Stream stream =
                 await client.GetStreamAsync(getRequestUrl);
-            Device device = await System.Text.Json.JsonSerializer.DeserializeAsync<Device>(stream);
+            DeviceJSON device = await System.Text.Json.JsonSerializer.DeserializeAsync<DeviceJSON>(stream);
             return device;
         }
-        static async Task<Devices> ProcessDevicesAsync(HttpClient client, List<string> deviceIds)
+        static async Task<DevicesJSON> ProcessDevicesAsync(HttpClient client, List<string> deviceIds)
         {
             string postRequestUrl = "http://tech-assessment.vnext.com.au/api/devices/assetId/";
             using HttpResponseMessage response = await client.PostAsJsonAsync(
                 postRequestUrl, 
                 new jsonContent(deviceIds:deviceIds));
-            var deserializedObject = JsonConvert.DeserializeObject<Devices>(response.Content.ReadAsStringAsync().Result);
+            var deserializedObject = JsonConvert.DeserializeObject<DevicesJSON>(response.Content.ReadAsStringAsync().Result);
             return deserializedObject;
         }
 
