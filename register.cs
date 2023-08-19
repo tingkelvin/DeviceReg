@@ -19,102 +19,71 @@ using Newtonsoft.Json.Linq;
 
 namespace AzureDevOps
 {
-    public record class device(
+    public record class Device(
         [property: JsonPropertyName("deviceId")] string deviceId,
         [property: JsonPropertyName("assetId")] string assetId
     );
 
-    public class MyClass
-    {
-        public List<device> devices { get; set; }
-  
-    }
-
-public record class d(
-    List<string> deviceIds = null);
+    public record class Devices(
+        [property: JsonPropertyName("devices")] List<Device> devices
+    );
+    public record class jsonContent(
+        List<string> deviceIds = null);
 
     public static class register
     {
-
-        public record class Repository(
-            [property: JsonPropertyName("name")] string Name);
-
         [FunctionName("register")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,
             ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
-
-            // Newtonsoft.Json.Linq.JArray devices = req["devices"];
-
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
             JArray devices = data?.devices;
-            List<string> deviceIDs = new List<string>{};
+            List<string> deviceIds = new List<string>{};
+            
             foreach (JObject item in devices) // <-- Note that here we used JObject instead of usual JProperty
             {
                 string id = item.GetValue("id").ToString();
-                // string url = item.GetValue("url").ToString();
-                deviceIDs.Add(id);
-                // ...
+                deviceIds.Add(id);
             }
-      
-            using HttpClient client = GetHttpClient("DRefJc8eEDyJzS19qYAKopSyWW8ijoJe8zcFhH5J1lhFtChC56ZOKQ==");
-            // using HttpClient client = new();
-            // client.DefaultRequestHeaders.Accept.Clear();
-            // client.DefaultRequestHeaders.Accept.Add(
-            //     new MediaTypeWithQualityHeaderValue("application/json"));
-            // client.DefaultRequestHeaders.Add("x-functions-key", "yeK7CM/Pj2vA3MFpuBxIFX7QIl1cKFOiviZaOjtVCrTq0VUzKeQjfw==");
-            await ProcessDevicesAsync(client, deviceIDs, log);
 
-            // log.LogInformation($"deviceId: {device.deviceId}");
-            // log.LogInformation($"assetId: {device.assetId}");
-            // foreach (var repo in repositories)
-            // {
-            //     log.LogInformation($"Name: {repo.Name}");
-            //     log.LogInformation($"Homepage: {repo.Homepage}");
-            //     log.LogInformation($"GitHub: {repo.GitHubHomeUrl}");
-            //     log.LogInformation($"Description: {repo.Description}");
-            //     log.LogInformation($"Watchers: {repo.Watchers:#,0}");
-            //     log.LogInformation($"{repo.LastPush}");
-            //     log.LogInformation();
-            // }
+            if (deviceIds.Count == 1)
+            {
+                using HttpClient client = GetHttpClient("yeK7CM/Pj2vA3MFpuBxIFX7QIl1cKFOiviZaOjtVCrTq0VUzKeQjfw==");
+                Device ret = await ProcessDeviceAsync(client, deviceIds[0]);
+                return new OkObjectResult(ret);
+            }
 
+            if (deviceIds.Count > 1)
+            {
+                using HttpClient client = GetHttpClient("DRefJc8eEDyJzS19qYAKopSyWW8ijoJe8zcFhH5J1lhFtChC56ZOKQ==");
+                Devices ret = await ProcessDevicesAsync(client, deviceIds);
+                return new OkObjectResult(ret);
+    
+            }
             return new OkObjectResult("hi");
         }
-        static async Task<device> ProcessDeviceAsync(HttpClient client)
+        static async Task<Device> ProcessDeviceAsync(HttpClient client, string deviceID)
         {
+            string getRequestUrl = "http://tech-assessment.vnext.com.au/api/devices/assetId/DVID00000125" + deviceID;
             await using Stream stream =
-                await client.GetStreamAsync("http://tech-assessment.vnext.com.au/api/devices/assetId/DVID00000125");
-            var device = await System.Text.Json.JsonSerializer.DeserializeAsync<device>(stream);
+                await client.GetStreamAsync(getRequestUrl);
+            Device device = await System.Text.Json.JsonSerializer.DeserializeAsync<Device>(stream);
             return device;
         }
-        static async Task<MyClass> ProcessDevicesAsync(HttpClient client, List<string> deviceIDs, ILogger log)
+        static async Task<Devices> ProcessDevicesAsync(HttpClient client, List<string> deviceIds)
         {
-             using HttpResponseMessage response = await client.PostAsJsonAsync(
-                "http://tech-assessment.vnext.com.au/api/devices/assetId/", 
-                new d(deviceIds:deviceIDs));
-
-            var deserializedObject = JsonConvert.DeserializeObject<MyClass>(response.Content.ReadAsStringAsync().Result);
-            log.LogInformation(response.Content.ReadAsStringAsync().Result);
+            string postRequestUrl = "http://tech-assessment.vnext.com.au/api/devices/assetId/";
+            using HttpResponseMessage response = await client.PostAsJsonAsync(
+                postRequestUrl, 
+                new jsonContent(deviceIds:deviceIds));
+            var deserializedObject = JsonConvert.DeserializeObject<Devices>(response.Content.ReadAsStringAsync().Result);
             return deserializedObject;
-
-            // using StringContent jsonContent = new(
-            //     System.Text.Json.JsonSerializer.Serialize(new
-            //     {
-            //         deviceIDs = deviceIDs
-            //     }),
-            //     Encoding.UTF8,
-            //     "application/json");
-            // using HttpResponseMessage response =
-            //     await client.PostAsync("http://tech-assessment.vnext.com.au/api/devices/assetId/", jsonContent);
-            // var device = await System.Text.Json.JsonSerializer.DeserializeAsync<List<device>>(stream);
-            // return device;
         }
 
         public static HttpClient GetHttpClient(string password){
-            // "yeK7CM/Pj2vA3MFpuBxIFX7QIl1cKFOiviZaOjtVCrTq0VUzKeQjfw=="
             HttpClient client = new();
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(
