@@ -14,6 +14,7 @@ using System.Text.Json;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using System.Text;
+using Microsoft.Data.SqlClient;
 
 using Newtonsoft.Json.Linq;
 
@@ -27,6 +28,15 @@ namespace AzureDevOps
     public record class Devices(
         [property: JsonPropertyName("devices")] List<Device> devices
     );
+
+    public class DeviceSQL
+    {
+        public string id { get; set; }
+        public string name { get; set; }
+        public string location { get; set; }
+        public string type { get; set; }
+        public string assetid { get; set; }
+    }
     public record class jsonContent(
         List<string> deviceIds = null);
 
@@ -35,7 +45,8 @@ namespace AzureDevOps
         [FunctionName("register")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,
-            ILogger log)
+            ILogger log,
+            [Sql(commandText: "dbo.Device", connectionStringSetting: "SqlConnectionString")] IAsyncCollector<DeviceSQL> deviceTable)
         {
             log.LogInformation("C# HTTP trigger processed a request.");
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
@@ -53,17 +64,33 @@ namespace AzureDevOps
             {
                 using HttpClient client = GetHttpClient("yeK7CM/Pj2vA3MFpuBxIFX7QIl1cKFOiviZaOjtVCrTq0VUzKeQjfw==");
                 Device ret = await ProcessDeviceAsync(client, deviceIds[0]);
-                return new OkObjectResult(ret);
+                // return new OkObjectResult(ret);
             }
 
             if (deviceIds.Count > 1)
             {
                 using HttpClient client = GetHttpClient("DRefJc8eEDyJzS19qYAKopSyWW8ijoJe8zcFhH5J1lhFtChC56ZOKQ==");
                 Devices ret = await ProcessDevicesAsync(client, deviceIds);
-                return new OkObjectResult(ret);
+                // return new OkObjectResult(ret);
     
             }
-            return new OkObjectResult("hi");
+
+            DeviceSQL dummy = new DeviceSQL();
+            dummy.id = "DVID000003";
+            dummy.name = "dummy3";
+            dummy.location = "home";
+            dummy.type = "1";
+            dummy.assetid = "1123";
+            // if (deviceTable.completed == null)
+            //     {
+            //         deviceTable.completed = false;
+            //     }
+
+            await deviceTable.AddAsync(dummy);
+            await deviceTable.FlushAsync();
+            List<DeviceSQL> rett = new List<DeviceSQL> { dummy };
+
+            return new OkObjectResult(rett);
         }
         static async Task<Device> ProcessDeviceAsync(HttpClient client, string deviceID)
         {
