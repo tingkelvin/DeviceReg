@@ -31,11 +31,11 @@ namespace AzureDevOps
 
     public class Device
     {
-        public string id { get; set; }
-        public string name { get; set; }
-        public string location { get; set; }
-        public string type { get; set; }
-        public string assetid { get; set; }
+        public string DeviceId { get; set; }
+        public string Name { get; set; }
+        public string Location { get; set; }
+        public string Type { get; set; }
+        public string AssetId { get; set; }
     }
     public record class jsonContent(
         Dictionary<string, Device>.KeyCollection deviceIds = null);
@@ -46,58 +46,42 @@ namespace AzureDevOps
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,
             ILogger log,
-            [Sql(commandText: "dbo.Device", connectionStringSetting: "SqlConnectionString")] IAsyncCollector<Device> deviceTable)
+            [Sql(commandText: "dbo.Devices", connectionStringSetting: "SqlConnectionString")] IAsyncCollector<Device> deviceTable)
         {
             log.LogInformation("C# HTTP trigger processed a request.");
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
             JArray devices = data?.devices;
-            List<string> deviceIds = new List<string>{};
+        
             Dictionary<string, Device> devicesHashMap = new Dictionary<string, Device>();
 
-    
             foreach (JObject item in devices) // <-- Note that here we used JObject instead of usual JProperty
             {
                 string id = item.GetValue("id").ToString();
                 string name = item.GetValue("Name").ToString();
                 string type = item.GetValue("type").ToString();
                 string location = item.GetValue("location").ToString();
-                deviceIds.Add(id);
                 devicesHashMap.Add(id, new Device{
-                    id = id,
-                    name = name,
-                    type = type,
-                    location = location
+                    DeviceId = id,
+                    Name = name,
+                    Type = type,
+                    Location = location
                 });
-
             }
 
-    
-    
-            List<Asset> ret = await ProcessDeviceAsync(devicesHashMap);
-            return new OkObjectResult(ret);
+            List<Asset> assets = await ProcessDeviceAsync(devicesHashMap);
 
-            // var e = devicesHashMap.GetEnumerator();
-            // e.MoveNext();
-            // string anElement = e.Current.Key;
-            // log.LogInformation(anElement);
+            foreach(Asset asset in assets)
+            {
+                devicesHashMap[asset.deviceId].AssetId = asset.assetId;
+            }
 
-            // Device dummy = new Device();
-            // dummy.id = "DVID000003";
-            // dummy.name = "dummy3";
-            // dummy.location = "home";
-            // dummy.type = "1";
-            // dummy.assetid = "1123";
-            // if (deviceTable.completed == null)
-            //     {
-            //         deviceTable.completed = false;
-            //     }
-
-            // await deviceTable.AddAsync(dummy);
-            // await deviceTable.FlushAsync();
-            // List<Device> rett = new List<Device> { dummy };
-
-            // return new OkObjectResult(rett);
+            foreach (var device in devicesHashMap){
+                // log.LogInformation($"{d.Key}: {d.Value.assetId}");
+                await deviceTable.AddAsync(device.Value);
+            }
+            await deviceTable.FlushAsync();
+            return new OkObjectResult(assets);
         }
         static async Task<List<Asset>> ProcessDeviceAsync(Dictionary<string, Device> devicesHashMap)
         {
@@ -121,7 +105,6 @@ namespace AzureDevOps
                 new jsonContent(deviceIds:devicesHashMap.Keys));
             var deserializedObject = JsonConvert.DeserializeObject<Assets>(response.Content.ReadAsStringAsync().Result);
             return deserializedObject.devices;
-
         }
         public static HttpClient GetHttpClient(string password){
             HttpClient client = new();
@@ -131,5 +114,6 @@ namespace AzureDevOps
             client.DefaultRequestHeaders.Add("x-functions-key", password);
             return client;
         }
+        
     }
 }
