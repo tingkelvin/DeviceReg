@@ -20,26 +20,6 @@ using Newtonsoft.Json.Linq;
 
 namespace AzureDevOps
 {
-    public record class Asset(
-        [property: JsonPropertyName("deviceId")] string deviceId,
-        [property: JsonPropertyName("assetId")] string assetId
-    );
-
-    public record class Assets(
-        [property: JsonPropertyName("devices")] List<Asset> devices
-    );
-
-    public class Device
-    {
-        public string DeviceId { get; set; }
-        public string Name { get; set; }
-        public string Location { get; set; }
-        public string Type { get; set; }
-        public string AssetId { get; set; }
-    }
-    public record class jsonContent(
-        Dictionary<string, Device>.KeyCollection deviceIds = null);
-
     public static class register
     {
         [FunctionName("register")]
