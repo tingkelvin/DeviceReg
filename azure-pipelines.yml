@@ -47,6 +47,18 @@ stages:
         archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
         replaceExistingArchive: true
 
+    - task: SqlAzureDacpacDeployment@1
+      inputs:
+        azureSubscription: 'Azure subscription 1 (4f69f38a-2319-4294-9232-c0991c0c917d)'
+        AuthenticationType: 'server'
+        ServerName: 'deviceregsqlserver.database.windows.net'
+        DatabaseName: 'DeviceReg-SQL'
+        SqlUsername: 'admin-sql'
+        SqlPassword: 'tutwex-2fUfwu-fymsyg'
+        deployType: 'SqlTask'
+        SqlFile: '$(workingDirectory)/sql/init.sql'
+        IpDetectionMethod: 'AutoDetect'
+
     - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
       artifact: drop
 
