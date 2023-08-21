@@ -46,19 +46,6 @@ stages:
         archiveType: zip
         archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
         replaceExistingArchive: true
-
-    - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
-      artifact: drop
-    - task: SqlAzureDacpacDeployment@1
-      inputs:
-        AuthenticationType: 'server'
-        ServerName: 'devicesqlserver.database.windows.net'
-        DatabaseName: 'Devcies-sql'
-        SqlUsername: 'admin-sql'
-        SqlPassword: '123321'
-        deployType: 'SqlTask'
-        SqlFile: '$(workingDirectory)/Sql/Create.sql'
-        IpDetectionMethod: 'AutoDetect'
         
 - stage: Deploy
   displayName: Deploy stage
