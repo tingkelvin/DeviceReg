@@ -47,42 +47,42 @@ stages:
         archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
         replaceExistingArchive: true
 
-    - task: SqlAzureDacpacDeployment@1
-      inputs:
-        azureSubscription: 'Azure subscription 1 (4f69f38a-2319-4294-9232-c0991c0c917d)'
-        AuthenticationType: 'server'
-        ServerName: 'deviceregsqlserver.database.windows.net'
-        DatabaseName: 'DeviceReg-SQL'
-        SqlUsername: 'admin-sql'
-        SqlPassword: 'tutwex-2fUfwu-fymsyg'
-        deployType: 'SqlTask'
-        SqlFile: 'sql/init.sql'
-        IpDetectionMethod: 'AutoDetect'
+    # - task: SqlAzureDacpacDeployment@1
+    #   inputs:
+    #     azureSubscription: 'Azure subscription 1 (4f69f38a-2319-4294-9232-c0991c0c917d)'
+    #     AuthenticationType: 'server'
+    #     ServerName: 'deviceregsqlserver.database.windows.net'
+    #     DatabaseName: 'DeviceReg-SQL'
+    #     SqlUsername: 'admin-sql'
+    #     SqlPassword: 'tutwex-2fUfwu-fymsyg'
+    #     deployType: 'SqlTask'
+    #     SqlFile: 'sql/init.sql'
+    #     IpDetectionMethod: 'AutoDetect'
 
     - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
       artifact: drop
 
-- stage: Deploy
-  displayName: Deploy stage
-  dependsOn: Build
-  condition: succeeded()
+# - stage: Deploy
+#   displayName: Deploy stage
+#   dependsOn: Build
+#   condition: succeeded()
 
-  jobs:
-  - deployment: Deploy
-    displayName: Deploy
-    environment: 'development'
-    pool:
-      vmImage: $(vmImageName)
+#   jobs:
+#   - deployment: Deploy
+#     displayName: Deploy
+#     environment: 'development'
+#     pool:
+#       vmImage: $(vmImageName)
 
-    strategy:
-      runOnce:
-        deploy:
+#     strategy:
+#       runOnce:
+#         deploy:
 
-          steps:
-          - task: AzureFunctionApp@1
-            displayName: 'Azure functions app deploy'
-            inputs:
-              azureSubscription: '$(azureSubscription)'
-              appType: functionApp
-              appName: $(functionAppName)
-              package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+#           steps:
+#           - task: AzureFunctionApp@1
+#             displayName: 'Azure functions app deploy'
+#             inputs:
+#               azureSubscription: '$(azureSubscription)'
+#               appType: functionApp
+#               appName: $(functionAppName)
+#               package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
