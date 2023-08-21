@@ -56,7 +56,7 @@ stages:
         SqlUsername: 'admin-sql'
         SqlPassword: 'tutwex-2fUfwu-fymsyg'
         deployType: 'SqlTask'
-        SqlFile: '$(workingDirectory)/sql/init.sql'
+        SqlFile: 'sql/init.sql'
         IpDetectionMethod: 'AutoDetect'
 
     - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
