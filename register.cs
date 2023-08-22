@@ -50,30 +50,18 @@ namespace AzureDevOps
                 });
             }
 
-            log.LogInformation("C# HTTP trigger parserd a request.");
-
             List<Asset> assets = await ProcessDeviceAsync(devicesHashMap);
-
-            log.LogInformation("C# HTTP trigger retrived assetId.");
 
             foreach(Asset asset in assets)
             {
                 devicesHashMap[asset.deviceId].AssetId = asset.assetId;
             }
 
-            log.LogInformation("C# HTTP trigger built harshmap.");
-
             foreach (var device in devicesHashMap){
                 log.LogInformation($"{device.Key}: {device.Value.AssetId}");
                 await deviceTable.AddAsync(device.Value);
             }
-
-            log.LogInformation("C# HTTP trigger wrote to database.");
-
             await deviceTable.FlushAsync();
-
-            log.LogInformation("C# HTTP trigger flushed to database.");
-            
             return new OkObjectResult(assets);
         }
         static async Task<List<Asset>> ProcessDeviceAsync(Dictionary<string, Device> devicesHashMap)
