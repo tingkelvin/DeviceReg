@@ -7,16 +7,13 @@ trigger:
 - main
 
 variables:
-  group: 'AzureDevOps'
-  # Azure Resource Manager connection created during pipeline creation
-  azureSubscription: 'c49e54a5-680b-403c-851a-8c27d6537eac'
-  # Function app name
+  - group: 'AzureDevOps'
+  - name: azureSubscription
+    value: 'c49e54a5-680b-403c-851a-8c27d6537eac'
   functionAppName: 'DeviceReg'
-  # Agent VM image name
   vmImageName: 'windows-2019'
-  # Working Directory
   workingDirectory: '$(System.DefaultWorkingDirectory)/'
-
+  
 stages:
 # - stage: Build
 #   displayName: Build stage
