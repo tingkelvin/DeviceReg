@@ -1,8 +1,9 @@
 
+from multiprocessing import Process
 import requests
-import pyodbc
+# import pyodbc
 
-url = "https://devicereg.azurewebsites.net/api/register"
+url = "http://localhost:7071/api/register"
 
 headers = {"Content-Type": "application/json"}
 data = {
@@ -16,8 +17,23 @@ data = {
     ]
 }
 
+def post_request(data):
+  print("start thread")
+  res = requests.post(url, headers=headers, json=data)
+  print(res.status_code)
+  assert(res.status_code == 200)
 
 def test_function_with_scenario_one():
-  res = requests.post(url, headers=headers, json=data)
-  assert(res.status_code == 200)
+  processPool = []
+  for i in range(10):
+    process = Process(target=post_request, args = (data,))
+    processPool.append(process)
+    process.start()
+  
+  for process in processPool:
+    process.join()
+  
+  print("done")
+
+
 

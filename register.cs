@@ -17,9 +17,33 @@ using System.Text;
 using Microsoft.Data.SqlClient;
 
 using Newtonsoft.Json.Linq;
-
+using System.Threading;
 namespace AzureDevOps
 {
+        public class RetryHandler : DelegatingHandler
+    {
+        // Strongly consider limiting the number of retries - "retry forever" is
+        // probably not the most user friendly way you could respond to "the
+        // network cable got pulled out."
+        private const int MaxRetries = 10;
+        public RetryHandler(HttpMessageHandler innerHandler)
+            : base(innerHandler)
+        { }
+        protected override async Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken)
+        {
+            HttpResponseMessage response = null;
+            for (int i = 0; i < MaxRetries; i++)
+            {
+                response = await base.SendAsync(request, cancellationToken);
+                if (response.IsSuccessStatusCode) {
+                    return response;
+                }
+            }
+            return response;
+        }
+    }
     public static class register
     {
         [FunctionName("register")]
@@ -68,26 +92,29 @@ namespace AzureDevOps
             if (devicesHashMap.Count == 1)
             {
                 using HttpClient getClient = GetHttpClient(Environment.GetEnvironmentVariable("GET_API_KEY"));
+
                 var enumerator = devicesHashMap.GetEnumerator();
                 enumerator.MoveNext();
                 string anElement = enumerator.Current.Key;
+                
                 string getRequestUrl = Environment.GetEnvironmentVariable("API_HOST") + anElement;
-                await using Stream stream =
-                    await getClient.GetStreamAsync(getRequestUrl);
-                Asset asset = await System.Text.Json.JsonSerializer.DeserializeAsync<Asset>(stream);
+                using HttpResponseMessage getResponse = await getClient.GetAsync(getRequestUrl);
+                getResponse.EnsureSuccessStatusCode();
+                Asset asset = JsonConvert.DeserializeObject<Asset>(getResponse.Content.ReadAsStringAsync().Result);
+                
                 return new List<Asset>{asset};
             }
 
             using HttpClient postClient = GetHttpClient(Environment.GetEnvironmentVariable("POST_API_KEY"));
             string postRequestUrl = Environment.GetEnvironmentVariable("API_HOST");
-            using HttpResponseMessage response = await postClient.PostAsJsonAsync(
+            using HttpResponseMessage postResponse = await postClient.PostAsJsonAsync(
                 postRequestUrl, 
                 new jsonContent(deviceIds:devicesHashMap.Keys));
-            var deserializedObject = JsonConvert.DeserializeObject<Assets>(response.Content.ReadAsStringAsync().Result);
-            return deserializedObject.devices;
+            Assets assets = JsonConvert.DeserializeObject<Assets>(postResponse.Content.ReadAsStringAsync().Result);
+            return assets.devices;
         }
         public static HttpClient GetHttpClient(string password){
-            HttpClient client = new();
+            HttpClient client = new HttpClient(new RetryHandler(new HttpClientHandler()));
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/json"));
