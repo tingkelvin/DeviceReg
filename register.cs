@@ -25,7 +25,7 @@ namespace AzureDevOps
         // Strongly consider limiting the number of retries - "retry forever" is
         // probably not the most user friendly way you could respond to "the
         // network cable got pulled out."
-        private const int MaxRetries = 20;
+        private const int MaxRetries = 100;
         public RetryHandler(HttpMessageHandler innerHandler)
             : base(innerHandler)
         { }
@@ -80,11 +80,11 @@ namespace AzureDevOps
                 devicesHashMap[asset.deviceId].AssetId = asset.assetId;
             }
 
-            foreach (var device in devicesHashMap){
-                // log.LogInformation($"{d.Key}: {d.Value.assetId}");
-                await deviceTable.AddAsync(device.Value);
-            }
-            await deviceTable.FlushAsync();
+            // foreach (var device in devicesHashMap){
+            //     // log.LogInformation($"{d.Key}: {d.Value.assetId}");
+            //     await deviceTable.AddAsync(device.Value);
+            // }
+            // await deviceTable.FlushAsync();
             return new OkObjectResult(assets);
         }
         static async Task<List<Asset>> ProcessDeviceAsync(Dictionary<string, Device> devicesHashMap)

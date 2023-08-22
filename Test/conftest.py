@@ -1,5 +1,6 @@
 import pytest
 import requests
+import json
 
 def pytest_addoption(parser):
     parser.addoption("--host", action="store", default="localhost:7071")
@@ -24,3 +25,8 @@ class Utils:
 @pytest.fixture
 def utils():
     return Utils
+
+@pytest.fixture
+def devicesData():
+    return json.load(open("Sample_Request.json"))
+    
