@@ -58,7 +58,6 @@ class Utils:
             with conn.cursor() as cursor:
                 cursor.execute("DELETE FROM [dbo].[devices]")
         
-
 @pytest.fixture
 def utils():
     return Utils

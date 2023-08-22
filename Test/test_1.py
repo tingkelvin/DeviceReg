@@ -3,13 +3,6 @@ from multiprocessing import Process
 import random
 import time
 
-
-# server = 'deviceregappsql.database.windows.net'
-# database = 'devicesdatabase'
-# username = 'admin-sql'
-# password = 'Abc!23321'   
-# driver= '{ODBC Driver 17 for SQL Server}'
-
 def test_one_10_get_request(host, utils, devicesData):
   print("Starting get request test")
   processPool = []

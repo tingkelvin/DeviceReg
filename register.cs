@@ -17,33 +17,10 @@ using System.Text;
 using Microsoft.Data.SqlClient;
 
 using Newtonsoft.Json.Linq;
-using System.Threading;
+
+
 namespace AzureDevOps
 {
-        public class RetryHandler : DelegatingHandler
-    {
-        // Strongly consider limiting the number of retries - "retry forever" is
-        // probably not the most user friendly way you could respond to "the
-        // network cable got pulled out."
-        private const int MaxRetries = 100;
-        public RetryHandler(HttpMessageHandler innerHandler)
-            : base(innerHandler)
-        { }
-        protected override async Task<HttpResponseMessage> SendAsync(
-            HttpRequestMessage request,
-            CancellationToken cancellationToken)
-        {
-            HttpResponseMessage response = null;
-            for (int i = 0; i < MaxRetries; i++)
-            {
-                response = await base.SendAsync(request, cancellationToken);
-                if (response.IsSuccessStatusCode) {
-                    return response;
-                }
-            }
-            return response;
-        }
-    }
     public static class register
     {
         [FunctionName("register")]
@@ -52,6 +29,7 @@ namespace AzureDevOps
             ILogger log,
             [Sql(commandText: "dbo.Devices", connectionStringSetting: "SqlConnectionString")] IAsyncCollector<Device> deviceTable)
         {
+            // parsing request body
             log.LogInformation("C# HTTP trigger processed a request.");
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
@@ -59,7 +37,8 @@ namespace AzureDevOps
         
             Dictionary<string, Device> devicesHashMap = new Dictionary<string, Device>();
 
-            foreach (JObject item in devices) // <-- Note that here we used JObject instead of usual JProperty
+            // build the hashmap to store the devices
+            foreach (JObject item in devices) 
             {
                 string id = item.GetValue("id").ToString();
                 string name = item.GetValue("Name").ToString();
@@ -73,54 +52,59 @@ namespace AzureDevOps
                 });
             }
 
+            // api call to retrive assetid
             List<Asset> assets = await ProcessDeviceAsync(devicesHashMap);
 
+            // write the asset id to the hashmap
             foreach(Asset asset in assets)
             {
                 devicesHashMap[asset.deviceId].AssetId = asset.assetId;
             }
 
+            // write to sql database
             foreach (var device in devicesHashMap){
-                // log.LogInformation($"{d.Key}: {d.Value.assetId}");
                 await deviceTable.AddAsync(device.Value);
             }
             await deviceTable.FlushAsync();
-            return new OkObjectResult(assets);
+            return new OkObjectResult("Succesfully register.");
         }
-        static async Task<List<Asset>> ProcessDeviceAsync(Dictionary<string, Device> devicesHashMap)
+    public static HttpClient GetHttpClient(string password)
+    {
+        // create http request client
+        HttpClient client = new HttpClient(new RetryHandler(new HttpClientHandler()));
+        client.DefaultRequestHeaders.Accept.Clear();
+        client.DefaultRequestHeaders.Accept.Add(
+            new MediaTypeWithQualityHeaderValue("application/json"));
+        client.DefaultRequestHeaders.Add("x-functions-key", password);
+        return client;
+    }
+    static async Task<List<Asset>> ProcessDeviceAsync(Dictionary<string, Device> devicesHashMap)
+    {
+        if (devicesHashMap.Count == 1)
         {
-            if (devicesHashMap.Count == 1)
-            {
-                using HttpClient getClient = GetHttpClient(Environment.GetEnvironmentVariable("GET_API_KEY"));
+            using HttpClient getClient = GetHttpClient(Environment.GetEnvironmentVariable("GET_API_KEY"));
 
-                var enumerator = devicesHashMap.GetEnumerator();
-                enumerator.MoveNext();
-                string anElement = enumerator.Current.Key;
-                
-                string getRequestUrl = Environment.GetEnvironmentVariable("API_HOST") + anElement;
-                using HttpResponseMessage getResponse = await getClient.GetAsync(getRequestUrl);
-                // getResponse.EnsureSuccessStatusCode();
-                Asset asset = JsonConvert.DeserializeObject<Asset>(getResponse.Content.ReadAsStringAsync().Result);
-                
-                return new List<Asset>{asset};
-            }
+            // get the first element of the hashmap
+            var enumerator = devicesHashMap.GetEnumerator();
+            enumerator.MoveNext();
+            string anElement = enumerator.Current.Key;
+            
+            // create get request
+            string getRequestUrl = Environment.GetEnvironmentVariable("API_HOST") + anElement;
+            using HttpResponseMessage getResponse = await getClient.GetAsync(getRequestUrl);
+            Asset asset = JsonConvert.DeserializeObject<Asset>(getResponse.Content.ReadAsStringAsync().Result);
+            return new List<Asset>{asset};
+        }
 
-            using HttpClient postClient = GetHttpClient(Environment.GetEnvironmentVariable("POST_API_KEY"));
-            string postRequestUrl = Environment.GetEnvironmentVariable("API_HOST");
-            using HttpResponseMessage postResponse = await postClient.PostAsJsonAsync(
-                postRequestUrl, 
-                new jsonContent(deviceIds:devicesHashMap.Keys));
-            Assets assets = JsonConvert.DeserializeObject<Assets>(postResponse.Content.ReadAsStringAsync().Result);
-            return assets.devices;
-        }
-        public static HttpClient GetHttpClient(string password){
-            HttpClient client = new HttpClient(new RetryHandler(new HttpClientHandler()));
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(
-                new MediaTypeWithQualityHeaderValue("application/json"));
-            client.DefaultRequestHeaders.Add("x-functions-key", password);
-            return client;
-        }
-        
+        using HttpClient postClient = GetHttpClient(Environment.GetEnvironmentVariable("POST_API_KEY"));
+        string postRequestUrl = Environment.GetEnvironmentVariable("API_HOST");
+
+        // create post request
+        using HttpResponseMessage postResponse = await postClient.PostAsJsonAsync(
+            postRequestUrl, 
+            new jsonContent(deviceIds:devicesHashMap.Keys));
+        Assets assets = JsonConvert.DeserializeObject<Assets>(postResponse.Content.ReadAsStringAsync().Result);
+        return assets.devices;
+    }
     }
 }

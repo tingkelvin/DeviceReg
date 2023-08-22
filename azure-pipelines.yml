@@ -7,6 +7,7 @@ trigger:
 - main
 
 variables:
+  - group: 'AzureDevOps'
   # Azure Resource Manager connection created during pipeline creation
   azureSubscription: 'c49e54a5-680b-403c-851a-8c27d6537eac'
   # Function app name
@@ -78,7 +79,7 @@ stages:
 
     - script: |
         cd Test
-        pytest -s --junitxml=$(Build.StagingDirectory)/result.xml --host devicereg.azurewebsites.net
+        pytest -s --junitxml=$(Build.StagingDirectory)/result.xml --host devicereg.azurewebsites.net --server $(azureSqlServerResourceName) --database $(azureSqlDBName) --username $(sqlUser) --password $(sqlPassword)
         ls
       displayName: 'Run tests'
 
