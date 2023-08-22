@@ -16,7 +16,7 @@ variables:
   # Working Directory
   workingDirectory: '$(System.DefaultWorkingDirectory)/'
 
-# stages:
+stages:
 # - stage: Build
 #   displayName: Build stage
 #   jobs:
