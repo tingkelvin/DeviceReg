@@ -65,7 +65,6 @@ stages:
 #               appType: functionApp
 #               appName: $(functionAppName)
 #               package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
-
 - stage: Test
   displayName: Test stage
   # dependsOn: Deploy
