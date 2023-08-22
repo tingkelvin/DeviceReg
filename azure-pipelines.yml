@@ -79,7 +79,7 @@ stages:
 
     - script: |
         cd Test
-        pytest -s --junitxml=$(Build.StagingDirectory)/result.xml --host devicereg.azurewebsites.net --server $(azureSqlServerResourceName) --database $(azureSqlDBName) --username $(sqlUser) --password '$(sqlPassword)''
+        pytest -s --junitxml=$(Build.StagingDirectory)/result.xml --host devicereg.azurewebsites.net --server $(azureSqlServerResourceName) --database $(azureSqlDBName) --username $(sqlUser) --password $(sqlPassword)
         ls
       displayName: 'Run tests'
 
