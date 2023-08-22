@@ -46,7 +46,7 @@ def test_two_10_post_request(host, utils, devicesData):
 
 def test_three_random_mix_request(host, utils, devicesData, server, database, username, password, driver):
   print("Starting random mix request test")
-  utils.clean_database(server, database, username, password, driver)
+  # utils.clean_database(server, database, username, password, driver)
   start = time.time()
   testDevices = []
   processPool = []
