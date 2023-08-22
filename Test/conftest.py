@@ -13,22 +13,13 @@ def pytest_generate_tests(metafunc):
         
 class Utils:
     @staticmethod
-    def post_request(host):
-        data = {
-            "devices": [
-                {
-                    "id":"DVID000001",
-                    "Name": "device 1 Name",
-                    "location":"Here",
-                    "type": "1"
-                }
-            ]
-        }
+    def post_request(host,data,testname, testNo):
         url = f"http://{host}/api/register"
         headers = {"Content-Type": "application/json"}
         res = requests.post(url, headers=headers, json=data)
-
+        print(f"{testname}-{testNo}: {res.status_code}")
         assert(res.status_code == 200)
+        
 
 @pytest.fixture
 def utils():
