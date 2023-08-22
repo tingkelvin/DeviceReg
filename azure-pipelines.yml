@@ -10,10 +10,13 @@ variables:
   - group: 'AzureDevOps'
   - name: azureSubscription
     value: 'c49e54a5-680b-403c-851a-8c27d6537eac'
-  functionAppName: 'DeviceReg'
-  vmImageName: 'windows-2019'
-  workingDirectory: '$(System.DefaultWorkingDirectory)/'
-  
+  - name: functionAppName
+    value: 'DeviceReg'
+  - name: vmImageName
+    value: 'windows-2019'
+  - name: workingDirectory
+    value: '$(System.DefaultWorkingDirectory)/'
+
 stages:
 # - stage: Build
 #   displayName: Build stage
