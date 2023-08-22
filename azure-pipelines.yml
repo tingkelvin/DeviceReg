@@ -81,7 +81,7 @@ stages:
 
     - script: |
         cd Test
-        pytest --junitxml=$(Build.StagingDirectory)/result.xml --host "devicereg.azurewebsites.net"
+        pytest --junitxml=$(Build.StagingDirectory)/result.xml --host devicereg.azurewebsites.net
         ls
       displayName: 'Run tests'
 
