@@ -71,22 +71,22 @@ stages:
   dependsOn: Deploy
   jobs:
   - job: Test
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.x'
-  - script: | 
-      pip install -r Test/requirements.txt
-      pip install pytest-cov
-    displayName: 'Install dependency'
+    steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.x'
+    - script: | 
+        pip install -r Test/requirements.txt
+        pip install pytest-cov
+      displayName: 'Install dependency'
 
-  - script: |
-      cd Test
-      pytest --junitxml=$(Build.StagingDirectory)/result.xml
-      ls
-    displayName: 'Run tests'
+    - script: |
+        cd Test
+        pytest --junitxml=$(Build.StagingDirectory)/result.xml
+        ls
+      displayName: 'Run tests'
 
-  - task: PublishTestResults@2
-    displayName: 'Publish test result /010.xml'
-    inputs:
-      testResultsFiles: '$(Build.StagingDirectory)/result.xml'
-      testRunTitle: 010
+    - task: PublishTestResults@2
+      displayName: 'Publish test result /010.xml'
+      inputs:
+        testResultsFiles: '$(Build.StagingDirectory)/result.xml'
+        testRunTitle: 010
