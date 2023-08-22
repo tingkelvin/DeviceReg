@@ -7,7 +7,7 @@ trigger:
 - main
 
 variables:
-  - group: 'AzureDevOps'
+  group: 'AzureDevOps'
   # Azure Resource Manager connection created during pipeline creation
   azureSubscription: 'c49e54a5-680b-403c-851a-8c27d6537eac'
   # Function app name
@@ -22,7 +22,7 @@ stages:
 #   displayName: Build stage
 #   jobs:
 #   - job: Build
-#     displayName: Build
+#     displayName: Build Dotnet App
 #     pool:
 #       vmImage: $(vmImageName)
 #     steps:
@@ -49,7 +49,7 @@ stages:
 #   condition: succeeded()
 #   jobs:
 #   - deployment: Deploy
-#     displayName: Deploy
+#     displayName: Deploy Dotnet App
 #     environment: 'development'
 #     pool:
 #       vmImage: $(vmImageName)
