@@ -80,11 +80,11 @@ namespace AzureDevOps
                 devicesHashMap[asset.deviceId].AssetId = asset.assetId;
             }
 
-            // foreach (var device in devicesHashMap){
-            //     // log.LogInformation($"{d.Key}: {d.Value.assetId}");
-            //     await deviceTable.AddAsync(device.Value);
-            // }
-            // await deviceTable.FlushAsync();
+            foreach (var device in devicesHashMap){
+                // log.LogInformation($"{d.Key}: {d.Value.assetId}");
+                await deviceTable.AddAsync(device.Value);
+            }
+            await deviceTable.FlushAsync();
             return new OkObjectResult(assets);
         }
         static async Task<List<Asset>> ProcessDeviceAsync(Dictionary<string, Device> devicesHashMap)
