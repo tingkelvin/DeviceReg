@@ -25,7 +25,7 @@ namespace AzureDevOps
         // Strongly consider limiting the number of retries - "retry forever" is
         // probably not the most user friendly way you could respond to "the
         // network cable got pulled out."
-        private const int MaxRetries = 10;
+        private const int MaxRetries = 20;
         public RetryHandler(HttpMessageHandler innerHandler)
             : base(innerHandler)
         { }
@@ -99,7 +99,7 @@ namespace AzureDevOps
                 
                 string getRequestUrl = Environment.GetEnvironmentVariable("API_HOST") + anElement;
                 using HttpResponseMessage getResponse = await getClient.GetAsync(getRequestUrl);
-                getResponse.EnsureSuccessStatusCode();
+                // getResponse.EnsureSuccessStatusCode();
                 Asset asset = JsonConvert.DeserializeObject<Asset>(getResponse.Content.ReadAsStringAsync().Result);
                 
                 return new List<Asset>{asset};
