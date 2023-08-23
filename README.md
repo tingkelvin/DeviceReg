@@ -125,9 +125,15 @@ Any response code rather than 200, indicates failure of the test.
 
 ### Test 3
 
-This test is a more comprehensive one. The test will read the Sample_Request.json and create a mix of single device registration and multiple device registration to the end point. The number of devices in multiple device registration is also programmed to be random. We pick a number between 1 and 50. In total, we created 1000 requests concurrently.
+This test is a more comprehensive one. 
 
 The script will execute "DELETE FROM [dbo].[devices]" to the SQL database to clean the database.
+
+Then, the script will read the Sample_Request.json and create a mix of single device registration and multiple device registration to the end point. 
+
+The multiple device registration will contain a number of devices between 1 t0 50.
+
+The script will continue send request until we have sent all the request for 1000 devices. Every devices will only have one registration request sent.
 
 Frist, we assessed the retry mechanism
 This can be assessed by asserting response code is always 200
@@ -168,5 +174,7 @@ This was a very fun project to work. This is my first time to build a .Net appli
 The CI/CD integration was extremely useful, which I should built it at the beginning of the project. At the begining, I was using python to build the Azure Function, which was working fine on my computer. However, when I tried to deploy to Azure Function, i notice that Azure Function has not supportted m1 python yet. If I built the pipeline at the start, I would have catch up this error earlier. In general, CI/CD and infrustructure as code tend to increase in speed of deployments, reduce errors and improve infrastructure consistency.
 
 A separate trigger for automated deployment would be nice. When I was making changes to the SQL data configuration. This will trigger main branch and start the whole automated deployment. There is no need to wait for the .Net application to build and deploy.
+
+Thread process may be implmented in Azure Function to speed up the application.
 
 Some of the commit messages are not clear and duplicate, shoud have used commit --amend.
