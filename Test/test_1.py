@@ -44,9 +44,9 @@ import time
 #     process.join()
 #   print("Post request test done")
 
-def test_three_random_mix_request(host, utils, devicesData, server):
+def test_three_random_mix_request(host, utils, devicesData, server:str, database:str, username:str, password:str, driver:str):
   print("Starting random mix request test")
-  utils.clean_database(server)
+  utils.clean_database(server=server)
   start = time.time()
   testDevices = []
   processPool = []
@@ -91,7 +91,12 @@ def test_three_random_mix_request(host, utils, devicesData, server):
   assert(end - start < 10*60)
 
   # assert all devices are written to sql database
-  queryDeviceIds = utils.sql_query("SELECT DeviceId FROM [dbo].[devices]")
+  queryDeviceIds = utils.sql_query(query="SELECT DeviceId FROM [dbo].[devices]", 
+                                   server=server, 
+                                   database=database, 
+                                   username=username, 
+                                   password=password, 
+                                   driver=driver)
   queryDeviceIds.sort()
   deviceIds.sort()
   assert(deviceIds == queryDeviceIds)

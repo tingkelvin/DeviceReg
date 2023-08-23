@@ -35,19 +35,14 @@ def pytest_generate_tests(metafunc):
         
 class Utils:
     @staticmethod
-    def post_request(host,data,testname, testNo):
+    def post_request(host:str, data:str, testname:str, testNo:str):
         url = f"http://{host}/api/register"
         headers = {"Content-Type": "application/json"}
         res = requests.post(url, headers=headers, json=data)
         print(f"{testname}-{testNo}: {res.status_code}")
         assert(res.status_code == 200)
 
-    def sql_query(query):
-        server = 'deviceregappsql.database.windows.net'
-        database = 'devicesdatabase'
-        username = 'admin-sql'
-        password = 'Abc!23321'   
-        driver= '{ODBC Driver 17 for SQL Server}'
+    def sql_query(query:str, server:str, database:str, username:str, driver:str):
         ret = []
         with pyodbc.connect('DRIVER='+driver+';SERVER=tcp:'+server+';PORT=1433;DATABASE='+database+';UID='+username+';PWD='+ password) as conn:
             with conn.cursor() as cursor:
@@ -58,12 +53,7 @@ class Utils:
                     row = cursor.fetchone()
         return ret
     
-    def clean_database(server):
-        # server = 'deviceregappsql.database.windows.net'
-        database = 'devicesdatabase'
-        username = 'admin-sql'
-        password = 'Abc!23321'   
-        driver= '{ODBC Driver 17 for SQL Server}'
+    def clean_database(server:str, database:str, username:str, driver:str):
         with pyodbc.connect('DRIVER='+driver+';SERVER=tcp:'+server+';PORT=1433;DATABASE='+database+';UID='+username+';PWD='+ password) as conn:
             with conn.cursor() as cursor:
                 cursor.execute("DELETE FROM [dbo].[devices]")
