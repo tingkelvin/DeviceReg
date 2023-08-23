@@ -35,8 +35,8 @@ This section list any major frameworks/libraries used to bootstrap the project.
 * Sql -> contains script to deploy database
 * Test -> contains script to conduct integration test
 * model -> contain .cs class for data modelling
-* utils -> helper functions for azure function written
-* register.cs -> the main script for azure function written
+* utils -> helper functions for azure function
+* register.cs -> the main script for azure function
 * azure-pipelines.yml -> configuration of azure devops pipeline
 
 ### Register Device(s)
