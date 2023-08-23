@@ -1,7 +1,21 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text.Json;
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
+using System.Text;
 
+using Microsoft.Data.SqlClient;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Extensions.Logging;
+
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace AzureDevOps
 {
@@ -37,7 +51,7 @@ namespace AzureDevOps
             }
 
             // api call to retrive assetid
-            List<Asset> assets = await Client.ProcessDeviceAsync(devicesHashMap);
+            List<Asset> assets = await ProcessDeviceAsync(devicesHashMap);
 
             // write the asset id to the hashmap
             foreach(Asset asset in assets)
