@@ -5,7 +5,7 @@ import pyodbc
 
 def pytest_addoption(parser):
     parser.addoption("--host", action="store", default="localhost:7071")
-    parser.addoption("--server", action="store")
+    parser.addoption("--server", action="store", type = str)
     parser.addoption("--username", action="store")
     parser.addoption("--password", action="store")
     parser.addoption("--database", action="store")
@@ -58,8 +58,8 @@ class Utils:
                     row = cursor.fetchone()
         return ret
     
-    def clean_database():
-        server = 'deviceregappsql.database.windows.net'
+    def clean_database(server):
+        # server = 'deviceregappsql.database.windows.net'
         database = 'devicesdatabase'
         username = 'admin-sql'
         password = 'Abc!23321'   

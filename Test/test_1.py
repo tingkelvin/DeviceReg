@@ -44,9 +44,9 @@ import time
 #     process.join()
 #   print("Post request test done")
 
-def test_three_random_mix_request(host, utils, devicesData):
+def test_three_random_mix_request(host, utils, devicesData, server):
   print("Starting random mix request test")
-  utils.clean_database()
+  utils.clean_database(server)
   start = time.time()
   testDevices = []
   processPool = []
