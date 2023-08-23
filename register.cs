@@ -37,7 +37,7 @@ namespace AzureDevOps
             }
 
             // api call to retrive assetid
-            List<Asset> assets = await ProcessDeviceAsync(devicesHashMap);
+            List<Asset> assets = await Client.ProcessDeviceAsync(devicesHashMap);
 
             // write the asset id to the hashmap
             foreach(Asset asset in assets)
