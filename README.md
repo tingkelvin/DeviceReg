@@ -31,6 +31,13 @@ This section list any major frameworks/libraries used to bootstrap the project.
 * Azure SQL Database
 * Azure DevOps
 
+### File Directory
+* Sql -> contains script to deploy database
+* Test -> contains script to conduct integration test
+* model -> contain .cs class for data modelling
+* utils -> helper functions for azure function written
+* register.cs -> the main script for azure function written
+* azure-pipelines.yml -> configuration of azure devops pipeline
 
 ### Register Device(s)
 
@@ -162,4 +169,3 @@ The CI/CD integration was extremely useful, which I should built it at the begin
 A separate trigger for automated deployment would be nice. When I was making changes to the SQL data configuration. This will trigger main branch and start the whole automated deployment. There is no need to wait for the .Net to build and deploy.
 
 Some of the commit messages are not clear and duplicate, shoud have used commit --amend,
-

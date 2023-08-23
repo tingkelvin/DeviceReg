@@ -72,6 +72,7 @@ stages:
         deployType: 'SqlTask'
         SqlFile: $(SqlFile)
         IpDetectionMethod: 'AutoDetect'
+        
 - stage: Build
   displayName: Build App stage
   jobs:
