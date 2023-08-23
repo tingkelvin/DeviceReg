@@ -18,60 +18,60 @@ variables:
     value: '$(System.DefaultWorkingDirectory)/'
 
 stages:
-# - stage: Create
-#   displayName: Create Database Stage
-#   jobs:
-#   - job: CreateServer
-#     displayName: Create SQL Server
-#     pool:
-#       vmImage: 'ubuntu-latest'
-#     steps:
-#     - task: AzureCLI@1
-#       displayName: Create SQL Server
-#       inputs:
-#         azureSubscription: $(azureSubscription)
-#         scriptLocation: 'inlineScript'
-#         inlinescript: 'az sql server create -l $(location) -g $(resourceGroupName) -n $(azureSqlServerResourceName) -u $(sqlUser) -p $(sqlPassword)'
-#     - task: AzureCLI@1
-#       displayName: Allow Public Access
-#       inputs:
-#         azureSubscription: $(azureSubscription)
-#         scriptLocation: 'inlineScript'
-#         inlinescript: 'az sql server firewall-rule create -g $(resourceGroupName) -s $(azureSqlServerResourceName) -n allow-public-access --start-ip-address $(start-ip-address) --end-ip-address $(end-ip-address)'
+- stage: Create
+  displayName: Create Database Stage
+  jobs:
+  - job: CreateServer
+    displayName: Create SQL Server
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: AzureCLI@1
+      displayName: Create SQL Server
+      inputs:
+        azureSubscription: $(azureSubscription)
+        scriptLocation: 'inlineScript'
+        inlinescript: 'az sql server create -l $(location) -g $(resourceGroupName) -n $(azureSqlServerResourceName) -u $(sqlUser) -p $(sqlPassword)'
+    - task: AzureCLI@1
+      displayName: Allow Public Access
+      inputs:
+        azureSubscription: $(azureSubscription)
+        scriptLocation: 'inlineScript'
+        inlinescript: 'az sql server firewall-rule create -g $(resourceGroupName) -s $(azureSqlServerResourceName) -n allow-public-access --start-ip-address $(start-ip-address) --end-ip-address $(end-ip-address)'
 
-#   - job: CreateDatabase
-#     displayName: Create SQL Database
-#     dependsOn: CreateServer
-#     pool:
-#       vmImage: 'ubuntu-latest'
-#     steps:
-#     - task: AzureCLI@1
-#       displayName: Create SQL Database
-#       inputs:
-#         azureSubscription: $(azureSubscription)
-#         scriptLocation: 'inlineScript'
-#         inlinescript: 'az sql db create -g $(resourceGroupName) -s $(azureSqlServerResourceName) -n $(azureSqlDBName) --service-objective basic'
+  - job: CreateDatabase
+    displayName: Create SQL Database
+    dependsOn: CreateServer
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: AzureCLI@1
+      displayName: Create SQL Database
+      inputs:
+        azureSubscription: $(azureSubscription)
+        scriptLocation: 'inlineScript'
+        inlinescript: 'az sql db create -g $(resourceGroupName) -s $(azureSqlServerResourceName) -n $(azureSqlDBName) --service-objective basic'
 
-# - stage: DeployDatabase
-#   displayName: Deploy Database Stage
-#   dependsOn: Create
-#   jobs:
-#   - job: DeployDACPAC
-#     displayName: Deploy Database
-#     pool:
-#       vmImage: $(vmImageName)
-#     steps:  
-#     - task: SqlAzureDacpacDeployment@1
-#       inputs:
-#         azureSubscription: 'Azure subscription 1 (4f69f38a-2319-4294-9232-c0991c0c917d)'
-#         AuthenticationType: 'server'
-#         ServerName: '$(azureSqlServerResourceName).database.windows.net'
-#         DatabaseName: $(azureSqlDBName)
-#         SqlUsername: $(sqlUser)
-#         SqlPassword: $(sqlPassword)
-#         deployType: 'SqlTask'
-#         SqlFile: $(SqlFile)
-#         IpDetectionMethod: 'AutoDetect'
+- stage: DeployDatabase
+  displayName: Deploy Database Stage
+  dependsOn: Create
+  jobs:
+  - job: DeployDACPAC
+    displayName: Deploy Database
+    pool:
+      vmImage: $(vmImageName)
+    steps:  
+    - task: SqlAzureDacpacDeployment@1
+      inputs:
+        azureSubscription: 'Azure subscription 1 (4f69f38a-2319-4294-9232-c0991c0c917d)'
+        AuthenticationType: 'server'
+        ServerName: '$(azureSqlServerResourceName).database.windows.net'
+        DatabaseName: $(azureSqlDBName)
+        SqlUsername: $(sqlUser)
+        SqlPassword: $(sqlPassword)
+        deployType: 'SqlTask'
+        SqlFile: $(SqlFile)
+        IpDetectionMethod: 'AutoDetect'
 - stage: Build
   displayName: Build App stage
   jobs:
