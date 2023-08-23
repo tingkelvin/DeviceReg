@@ -41,6 +41,7 @@ stages:
 
   - job: CreateDatabase
     displayName: Create SQL Database
+    dependsOn: CreateServer
     pool:
       vmImage: 'ubuntu-latest'
     steps:
@@ -52,6 +53,8 @@ stages:
         inlinescript: 'az sql db create -g $(resourceGroupName) -s $(azureSqlServerResourceName) -n $(azureSqlDBName) --service-objective basic'
 
 - stage: DeployDatabase
+  displayName: Deploy Stage
+  depends: Create
   jobs:
   - job: DeployDACPAC
     displayName: Deploy Database
@@ -120,7 +123,7 @@ stages:
 
 - stage: Test
   displayName: Test stage
-  # dependsOn: Deploy
+  dependsOn: Deploy
   jobs:
   - job: Test
     steps:
