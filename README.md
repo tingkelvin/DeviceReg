@@ -83,7 +83,6 @@ To register multiple devices, make a post request to the endpoint with the follo
 ### Azure DevOps Pipeline
 The azure-pipelines.yml contains the configuration of the pipeline.
 
-![pipeline](https://github.com/tingkelvin/DeviceReg/assets/49113121/dfc1b9de-2f46-45c3-bbd8-64bae38ec252)
 There are 5 stages:
 
  1. Create Database Stage - AzureCLI@1  
@@ -98,11 +97,12 @@ There are 5 stages:
     ![test](https://github.com/tingkelvin/DeviceReg/assets/49113121/5646ba1f-548f-4ae0-8a23-1043bab4b687)
 
 Any commits to the main branch will trigger this pipeline.  
-![AzurePipeline](https://github.com/tingkelvin/DeviceReg/assets/49113121/4e7ebc69-a6f2-42fc-82a9-8309ed004a02)
+![pipeline](https://github.com/tingkelvin/DeviceReg/assets/49113121/27c0b32f-fb82-481e-b859-233587683cc6)
 
 ## Integration Test 
 
 The test is done by Pytest, a testing frame work built in Python. The test will stimulate register request concurrently to the end point for registration.
+![test](https://github.com/tingkelvin/DeviceReg/assets/49113121/c036760e-d640-4886-9cf3-da781e239dfc)
 
 ### Test 1
 This test will stimulate 10 requests to register one single device to the end points.
@@ -175,6 +175,4 @@ The CI/CD integration was extremely useful, which I should built it at the begin
 
 A separate trigger for automated deployment would be nice. When I was making changes to the SQL data configuration. This will trigger main branch and start the whole automated deployment. There is no need to wait for the .Net application to build and deploy.
 
-Thread process may be implmented in Azure Function to speed up the application.
-
-Some of the commit messages are not clear and duplicate, shoud have used commit --amend.
+Some of the commit messages are not clear and duplicate, shoud have used commit --amend. Use branches to develop features and merge them to main when needed.
