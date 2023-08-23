@@ -54,7 +54,7 @@ stages:
 
 - stage: DeployDatabase
   displayName: Deploy Stage
-  depends: Create
+  dependsOn: Create
   jobs:
   - job: DeployDACPAC
     displayName: Deploy Database
