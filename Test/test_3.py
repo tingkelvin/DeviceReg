@@ -8,7 +8,7 @@ def test_three_random_mix_request(host, utils, devicesData, server:str, database
   start = time.time()
   testDevices = []
   processPool = []
-  max_number = 10
+  max_number = 1000
   i = 0
 
   # generate 1000 random request 
