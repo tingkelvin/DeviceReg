@@ -1,22 +1,6 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text.Json;
-using System.Collections.Generic;
-using System.Text.Json.Serialization;
-using System.Text;
-using Microsoft.Data.SqlClient;
-
-using Newtonsoft.Json.Linq;
 
 
 namespace AzureDevOps
@@ -68,43 +52,5 @@ namespace AzureDevOps
             await deviceTable.FlushAsync();
             return new OkObjectResult("Succesfully register.");
         }
-    public static HttpClient GetHttpClient(string password)
-    {
-        // create http request client
-        HttpClient client = new HttpClient(new RetryHandler(new HttpClientHandler()));
-        client.DefaultRequestHeaders.Accept.Clear();
-        client.DefaultRequestHeaders.Accept.Add(
-            new MediaTypeWithQualityHeaderValue("application/json"));
-        client.DefaultRequestHeaders.Add("x-functions-key", password);
-        return client;
-    }
-    static async Task<List<Asset>> ProcessDeviceAsync(Dictionary<string, Device> devicesHashMap)
-    {
-        if (devicesHashMap.Count == 1)
-        {
-            using HttpClient getClient = GetHttpClient(Environment.GetEnvironmentVariable("GET_API_KEY"));
-
-            // get the first element of the hashmap
-            var enumerator = devicesHashMap.GetEnumerator();
-            enumerator.MoveNext();
-            string anElement = enumerator.Current.Key;
-            
-            // create get request
-            string getRequestUrl = Environment.GetEnvironmentVariable("API_HOST") + anElement;
-            using HttpResponseMessage getResponse = await getClient.GetAsync(getRequestUrl);
-            Asset asset = JsonConvert.DeserializeObject<Asset>(getResponse.Content.ReadAsStringAsync().Result);
-            return new List<Asset>{asset};
-        }
-
-        using HttpClient postClient = GetHttpClient(Environment.GetEnvironmentVariable("POST_API_KEY"));
-        string postRequestUrl = Environment.GetEnvironmentVariable("API_HOST");
-
-        // create post request
-        using HttpResponseMessage postResponse = await postClient.PostAsJsonAsync(
-            postRequestUrl, 
-            new jsonContent(deviceIds:devicesHashMap.Keys));
-        Assets assets = JsonConvert.DeserializeObject<Assets>(postResponse.Content.ReadAsStringAsync().Result);
-        return assets.devices;
-    }
     }
 }
