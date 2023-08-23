@@ -42,7 +42,12 @@ class Utils:
         print(f"{testname}-{testNo}: {res.status_code}")
         assert(res.status_code == 200)
 
-    def sql_query(query, server, database, username, password, driver):
+    def sql_query(query):
+        server = 'deviceregappsql.database.windows.net'
+        database = 'devicesdatabase'
+        username = 'admin-sql'
+        password = 'Abc!23321'   
+        driver= '{ODBC Driver 17 for SQL Server}'
         ret = []
         with pyodbc.connect('DRIVER='+driver+';SERVER=tcp:'+server+';PORT=1433;DATABASE='+database+';UID='+username+';PWD='+ password) as conn:
             with conn.cursor() as cursor:
@@ -53,7 +58,12 @@ class Utils:
                     row = cursor.fetchone()
         return ret
     
-    def clean_database(server, database, username, password, driver):
+    def clean_database():
+        server = 'deviceregappsql.database.windows.net'
+        database = 'devicesdatabase'
+        username = 'admin-sql'
+        password = 'Abc!23321'   
+        driver= '{ODBC Driver 17 for SQL Server}'
         with pyodbc.connect('DRIVER='+driver+';SERVER=tcp:'+server+';PORT=1433;DATABASE='+database+';UID='+username+';PWD='+ password) as conn:
             with conn.cursor() as cursor:
                 cursor.execute("DELETE FROM [dbo].[devices]")
