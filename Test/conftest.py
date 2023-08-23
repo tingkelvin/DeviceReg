@@ -42,7 +42,7 @@ class Utils:
         print(f"{testname}-{testNo}: {res.status_code}")
         assert(res.status_code == 200)
 
-    def sql_query(query:str, server:str, database:str, username:str, driver:str):
+    def sql_query(query:str, server:str, database:str, username:str, password:str, driver:str):
         ret = []
         with pyodbc.connect('DRIVER='+driver+';SERVER=tcp:'+server+';PORT=1433;DATABASE='+database+';UID='+username+';PWD='+ password) as conn:
             with conn.cursor() as cursor:

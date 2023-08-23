@@ -46,7 +46,7 @@ import time
 
 def test_three_random_mix_request(host, utils, devicesData, server:str, database:str, username:str, password:str, driver:str):
   print("Starting random mix request test")
-  utils.clean_database(server=server)
+  utils.clean_database(server=server, database=database, username=username, password=password, driver=driver)
   start = time.time()
   testDevices = []
   processPool = []
