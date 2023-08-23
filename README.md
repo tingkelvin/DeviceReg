@@ -144,11 +144,11 @@ Secondly, we assessed if the total number of registration is 1000 and every requ
 
      assert(len(testDevices) == max_number and len(testDevices) == len(set(deviceIds)))
 
-Thirdly, the duration of this test should be less than 10,
+Thirdly, the duration of this test should be less than 10 minutes,
 
      assert(end - start < 10*60)
 
-Lastly, the script will execute a query to database to retrieve all the deviceIds, and we check if every request has written the device id to the database.
+Lastly, the script will execute a query to database to retrieve all the deviceIds, and we check if every device id is written to the database.
 
      assert(deviceIds == queryDeviceIds)
      
