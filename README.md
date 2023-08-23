@@ -131,7 +131,7 @@ The script will execute "DELETE FROM [dbo].[devices]" to the SQL database to cle
 
 Then, the script will read the Sample_Request.json and create a mix of single device registration and multiple device registration to the end point. 
 
-The multiple device registration will contain a number of devices between 1 t0 50.
+The multiple device registration will contain a number of devices between 1 to 50.
 
 The script will continue send request until we have sent all the request for 1000 devices. Every devices will only have one registration request sent.
 
