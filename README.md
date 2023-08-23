@@ -11,9 +11,9 @@
 
 ![azurefunction](https://grapecitycontentcdn.azureedge.net/blogs/grapecity/20181112-an-introduction-to-azure-functions-/2.png)
 
-The project is about building a RESful API for customer to register device. This can be done by:
-* Building an Azure Http Trigger Function that acts as an API. This API will also consume another API to retrieve data, namely asset id.
-* Writing the data to SQL database. The data includes asset id, device id, name location and type.
+The project is about building a RESTful API for customer to register device. This can be done by:
+* Building an Azure Http Trigger Function that acts as an API. This API will also consume another API to retrieve data, mainly  the asset id.
+* Writing the data to SQL database. The data includes asset id, device id, name, location and type.
 * Using infrastructure as code and automated deployment pipeline. The pipeline composed of 5 stages: Create Database, Deploy Database, Build App, Deploy App and Test (Integration)
 
 Performance requirement:
@@ -34,7 +34,7 @@ This section list any major frameworks/libraries used to bootstrap the project.
 ### File Directory
 * Sql -> contains script to deploy database
 * Test -> contains script to conduct integration test
-* model -> contain .cs class for data modelling
+* model -> contain .net class for data modelling
 * utils -> helper functions for azure function
 * register.cs -> the main script for azure function
 * azure-pipelines.yml -> configuration of azure devops pipeline
@@ -102,11 +102,11 @@ Any commits to the main branch will trigger this pipeline.
 
 ## Integration Test 
 
-The test is done by Pytest, a testing frame work built by Python. The test will stimulate register request concurrently to the end point
+The test is done by Pytest, a testing frame work built in Python. The test will stimulate register request concurrently to the end point for registration.
 
 ### Test 1
 This test will stimulate 10 requests to register one single device to the end points.
-The purpose of the test is to see if get request to retrieve asset id and retry mechanism is working.
+The purpose of the test is to see if get request to retrieve asset id is working.
 This can be assessed by asserting response code is 200
 
     assert(res.status_code == 200)
@@ -115,8 +115,8 @@ Any response code rather than 200, indicates failure of the test.
 
 ### Test 2
 
-This test is similar to previous test .  10 requests contain multiple devices registration are made to the end points.
-The purpose of the test is to see if post request to retrieve multiple asset id and retry mechanism is working.
+This test is similar to previous test . 10 requests contain multiple devices registration are made to the end points.
+The purpose of the test is to see if post request to retrieve multiple asset id is working.
 This can be assessed by asserting response code is 200
 
     assert(res.status_code == 200)
@@ -130,7 +130,7 @@ This test is a more comprehensive one. The test will read the Sample_Request.jso
 The script will execute "DELETE FROM [dbo].[devices]" to the SQL database to clean the database.
 
 Frist, we assessed the retry mechanism
-This can be assessed by asserting response code is 200
+This can be assessed by asserting response code is always 200
 
     assert(res.status_code == 200)
 
@@ -142,12 +142,12 @@ Thirdly, the duration of this test should be less than 10,
 
      assert(end - start < 10*60)
 
-Lastly, the script will execute a query to database to retrieve all the deviceIds, and we check if they are the same.
+Lastly, the script will execute a query to database to retrieve all the deviceIds, and we check if every request has written the device id to the database.
 
      assert(deviceIds == queryDeviceIds)
      
  ### Publish Test Result
- Pytest could publish test summary and reult in xml, which Azure DevOps can display in html.
+ Pytest could publish test summary and result in xml, which Azure DevOps can display in html.
 
  #### Test Summary
  ![testresult](https://github.com/tingkelvin/DeviceReg/assets/49113121/137ebcd7-a8bd-4b16-a7f6-1dc712022470)
@@ -158,14 +158,15 @@ Lastly, the script will execute a query to database to retrieve all the deviceId
  #### Database Query
  ![sql](https://github.com/tingkelvin/DeviceReg/assets/49113121/3943ea2d-4f33-47e8-8380-2560e500d474)
 <!-- USAGE EXAMPLES -->
+
 ## Conclusion
 
 This was a very fun project to work. This is my first time to build a .Net application, Azure DevOps pipeline and different Azure Products.
 
 ### Things that I could do better
 
-The CI/CD integration was extremely useful, which I should built it at the beginning of the project. I was using python to build the Azure Function, which was working fine on my computer. However, Azure Function does not support m1 python yet, hence I could not deploy the app. If I built the pipeline, I would have abled to deploy the app immediately and catch those errors earlier to speed up the development process.
+The CI/CD integration was extremely useful, which I should built it at the beginning of the project. At the begining, I was using python to build the Azure Function, which was working fine on my computer. However, when I tried to deploy to Azure Function, i notice that Azure Function has not supportted m1 python yet. If I built the pipeline at the start, I would have catch up this error earlier. In general, CI/CD and infrustructure as code tend to increase in speed of deployments, reduce errors and improve infrastructure consistency.
 
-A separate trigger for automated deployment would be nice. When I was making changes to the SQL data configuration. This will trigger main branch and start the whole automated deployment. There is no need to wait for the .Net to build and deploy.
+A separate trigger for automated deployment would be nice. When I was making changes to the SQL data configuration. This will trigger main branch and start the whole automated deployment. There is no need to wait for the .Net application to build and deploy.
 
-Some of the commit messages are not clear and duplicate, shoud have used commit --amend,
+Some of the commit messages are not clear and duplicate, shoud have used commit --amend.
