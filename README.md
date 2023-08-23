@@ -70,8 +70,8 @@ To register multiple devices, make a post request to the endpoint with the follo
 	    ]
     }
 
-
-
+### Example of using Postman
+![postman](https://github.com/tingkelvin/DeviceRegistration/assets/49113121/50c1fb76-570d-49e2-8b43-55fe86c6c063)
 
 ### Azure DevOps Pipeline
 The azure-pipelines.yml contains the configuration of the pipeline.
@@ -160,4 +160,6 @@ This was a very fun project to work. This is my first time to build a .Net appli
 The CI/CD integration was extremely useful, which I should built it at the beginning of the project. I was using python to build the Azure Function, which was working fine on my computer. However, Azure Function does not support m1 python yet, hence I could not deploy the app. If I built the pipeline, I would have abled to deploy the app immediately and catch those errors earlier to speed up the development process.
 
 A separate trigger for automated deployment would be nice. When I was making changes to the SQL data configuration. This will trigger main branch and start the whole automated deployment. There is no need to wait for the .Net to build and deploy.
+
+Some of the commit messages are not clear and duplicate, shoud have used commit --amend,
 
