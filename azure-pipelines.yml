@@ -17,7 +17,7 @@ variables:
   - name: workingDirectory
     value: '$(System.DefaultWorkingDirectory)/'
 
-# stages:
+stages:
 # - stage: Create
 #   displayName: Create Database Stage
 #   jobs:
