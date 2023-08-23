@@ -32,8 +32,8 @@ This section list any major frameworks/libraries used to bootstrap the project.
 * Azure DevOps
 
 ### File Directory
-* Sql -> contains script to deploy database
-* Test -> contains script to conduct integration test
+* sql -> contains script to deploy database
+* test -> contains script to conduct integration test
 * model -> contain .net class for data modelling
 * utils -> helper functions for azure function
 * register.cs -> the main script for azure function
