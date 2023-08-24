@@ -5,8 +5,6 @@
 
 trigger:
 - main
-pool:
-  name: Default
   
 variables:
   - group: 'AzureDevOps'
